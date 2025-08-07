@@ -875,15 +875,38 @@ local function get_line_points(x0 ,y0 ,x1 ,y1)
 	return points
 end
 
+local _line_store_x = nil
+local _line_store_y = nil
+
 function api.line(x0, y0, x1, y1, col)
-	if col then
-		color(col)
+	if x0 == nil then
+		_line_store_x = nil
+		_line_store_y = nil
+		return
 	end
 
 	x0 = flr(api._tonumber(x0) or 0) + 1
 	y0 = flr(api._tonumber(y0) or 0) + 1
-	x1 = flr(api._tonumber(x1) or 0) + 1
-	y1 = flr(api._tonumber(y1) or 0) + 1
+	if x1 and y1 then
+		x1 = flr(api._tonumber(x1) or _line_store_x) + 1
+		y1 = flr(api._tonumber(y1) or _line_store_y) + 1
+		_line_store_x = x1
+		_line_store_y = y1
+	else
+		col = x1
+		x1 = _line_store_x
+		y1 = _line_store_y
+		_line_store_x = x0
+		_line_store_y = y0
+	end
+
+	if col then
+		color(col)
+	end
+
+	if not x1 or not y1 then
+		return love.graphics.point(x0, y0)
+	end
 
 	local points = get_line_points(x0, y0, x1, y1)
 
